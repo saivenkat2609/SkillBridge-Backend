@@ -2,7 +2,7 @@
 {
     public class SkillQueryParams
     {
-        public string SearchTerm { get; set; }
+        public string? SearchTerm { get; set; }
 
         public int? CategoryId { get; set; }
         public int MinPrice { get; set; } = 0;
