@@ -60,11 +60,10 @@ using (var scope = app.Services.CreateScope())
 }
    
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Show detailed errors in all environments temporarily for debugging
+app.UseSwagger();
+app.UseSwaggerUI();
+app.UseDeveloperExceptionPage();
 
 //app.UseHttpsRedirection();
 app.UseCors("AllowFrontend");
