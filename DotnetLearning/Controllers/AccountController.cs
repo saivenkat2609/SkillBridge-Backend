@@ -87,11 +87,20 @@ namespace DotnetLearning.Controllers
                 return BadRequest("Please confirm your email before logging in.");
             var result = await _signInManager.PasswordSignInAsync(login.Email, login.Password, login.RememberMe??false, false);
             if (result.Succeeded)
-            { 
+            {
                 var roles = await _userManager.GetRolesAsync(user);
                 var role = roles.FirstOrDefault();
-                
-                return Ok(new { id = user.Id, email = user.Email, role = role });
+                // Return same shape as Google login so frontend AuthContext works correctly
+                // Without isOnboardingComplete, frontend treats it as undefined (falsy)
+                // and OnboardingGuard redirects every email login to /onboarding
+                return Ok(new
+                {
+                    id = user.Id,
+                    email = user.Email,
+                    name = $"{user.FirstName} {user.LastName}",
+                    role,
+                    isOnboardingComplete = user.IsOnboardingComplete
+                });
             }
             return BadRequest("Invalid Login Attempt.");
         }
