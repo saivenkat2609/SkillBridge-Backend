@@ -2,7 +2,6 @@
 using DotnetLearning.Services;
 using DotnetLearning.Utils;
 using Google.Apis.Auth;
-using Microsoft.AspNet.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
