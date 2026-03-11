@@ -44,19 +44,27 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-using (var scope = app.Services.CreateScope())
+try
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
 
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    if (!await roleManager.RoleExistsAsync("Teacher"))
-        await roleManager.CreateAsync(new IdentityRole("Teacher"));
-    if (!await roleManager.RoleExistsAsync("User"))
-        await roleManager.CreateAsync(new IdentityRole("User"));
-    // Student role used by Google OAuth new users and Onboarding role selection
-    if (!await roleManager.RoleExistsAsync("Student"))
-        await roleManager.CreateAsync(new IdentityRole("Student"));
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        if (!await roleManager.RoleExistsAsync("Teacher"))
+            await roleManager.CreateAsync(new IdentityRole("Teacher"));
+        if (!await roleManager.RoleExistsAsync("User"))
+            await roleManager.CreateAsync(new IdentityRole("User"));
+        if (!await roleManager.RoleExistsAsync("Student"))
+            await roleManager.CreateAsync(new IdentityRole("Student"));
+    }
+}
+catch (Exception ex)
+{
+    // Log startup error but don't crash — app can still serve requests
+    Console.WriteLine($"STARTUP ERROR: {ex.Message}");
+    Console.WriteLine(ex.StackTrace);
 }
    
 // Configure the HTTP request pipeline.
