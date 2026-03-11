@@ -7,7 +7,6 @@ using System.Security.Claims;
 namespace DotnetLearning.Controllers
 {
     [ApiController]
-    [Authorize(Roles = "Teacher")]
     public class TeachersController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -23,6 +22,7 @@ namespace DotnetLearning.Controllers
             _context = context;
         }
         [HttpPost]
+        [Authorize(Roles = "Teacher")]
         [Route("api/teachers/profile")]
         public async Task<IActionResult> createTeacherProfile([FromBody] TeacherDto teacherDetails)
         {
@@ -49,6 +49,7 @@ namespace DotnetLearning.Controllers
             return Ok();
         }
         [HttpGet]
+        [Authorize]
         [Route("api/teachers/{teacherId}/availability")]
         public async Task<IActionResult> getTeacherAvailability(string teacherId, DateTime fromDate, int durationInMinutes)
         {
@@ -107,6 +108,7 @@ namespace DotnetLearning.Controllers
         }
         public record AvailabilityDto(DayOfWeek DayOfWeek, TimeSpan StartTime, TimeSpan EndTime);
         [HttpPost]
+        [Authorize(Roles = "Teacher")]
         [Route("api/teachers/availability")]
         public async Task<IActionResult> setTeacherAvailability([FromBody] List<AvailabilityDto> availabilityDtos)
         {
@@ -129,6 +131,7 @@ namespace DotnetLearning.Controllers
             return Ok();
         }
         [HttpGet]
+        [Authorize(Roles = "Teacher")]
         [Route("/api/teachers/stats")]
         public async Task<IActionResult> getTeacherStats()
         {
