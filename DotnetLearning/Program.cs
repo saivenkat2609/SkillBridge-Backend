@@ -72,6 +72,26 @@ catch (Exception ex)
 // Configure the HTTP request pipeline.
 // CORS must be first so headers are present even on error responses
 app.UseCors("AllowFrontend");
+
+// CHIPS: append Partitioned to Identity cookie so Chrome allows it cross-origin
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        if (context.Response.Headers.TryGetValue("Set-Cookie", out var cookies))
+        {
+            var updated = cookies
+                .Select(c => c.Contains(".AspNetCore.Identity.Application") && !c.Contains("Partitioned")
+                    ? c + "; Partitioned"
+                    : c)
+                .ToArray();
+            context.Response.Headers["Set-Cookie"] = updated;
+        }
+        return Task.CompletedTask;
+    });
+    await next();
+});
+
 app.UseDeveloperExceptionPage();
 app.UseSwagger();
 app.UseSwaggerUI();
