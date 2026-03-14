@@ -34,6 +34,10 @@ namespace DotnetLearning.Services
             var speakSkill   = await GetOrCreateSkill(db, "Public Speaking Coaching",     "Overcome fear of public speaking and deliver confident presentations.", 650,  teacher1, 5, 5.0, 14, log);
             var prodSkill    = await GetOrCreateSkill(db, "Productivity Systems",         "Build a personal productivity system using GTD, Notion, and time-blocking.", 400,  teacher2, 5, 4.6, 19, log);
 
+            // --- TEACHER AVAILABILITY ---
+            await GetOrCreateAvailability(db, teacher1, log);
+            await GetOrCreateAvailability(db, teacher2, log);
+
             // --- BOOKINGS (skip if already seeded) ---
             if (await db.Bookings.AnyAsync())
             {
@@ -98,8 +102,39 @@ namespace DotnetLearning.Services
             var bookings = await db.Bookings.ToListAsync();
             if (bookings.Any()) { db.Bookings.RemoveRange(bookings); await db.SaveChangesAsync(); log.Add($"Cleared {bookings.Count} bookings"); }
 
+            var availabilities = await db.TeacherAvailabilities.ToListAsync();
+            if (availabilities.Any()) { db.TeacherAvailabilities.RemoveRange(availabilities); await db.SaveChangesAsync(); log.Add($"Cleared {availabilities.Count} availability slots"); }
+
             log.AddRange(await RunAsync(userManager, db));
             return log;
+        }
+
+        private static async Task GetOrCreateAvailability(AppDbContext db, ApplicationUser teacher, List<string> log)
+        {
+            var exists = await db.TeacherAvailabilities.AnyAsync(a => a.TeacherId == teacher.Id);
+            if (exists) { log.Add($"Availability for {teacher.Email} already exists — skipped"); return; }
+
+            // Alice: Mon, Wed, Fri  9am–5pm
+            // Bob:   Tue, Thu, Sat 10am–6pm
+            var days = teacher.Email == "alice@skillswap.com"
+                ? new[] { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }
+                : new[] { DayOfWeek.Tuesday, DayOfWeek.Thursday, DayOfWeek.Saturday };
+
+            var start = teacher.Email == "alice@skillswap.com" ? TimeSpan.FromHours(9) : TimeSpan.FromHours(10);
+            var end   = teacher.Email == "alice@skillswap.com" ? TimeSpan.FromHours(17) : TimeSpan.FromHours(18);
+
+            foreach (var day in days)
+            {
+                db.TeacherAvailabilities.Add(new TeacherAvailability
+                {
+                    TeacherId = teacher.Id,
+                    DayOfWeek = day,
+                    StartTime = start,
+                    EndTime   = end
+                });
+            }
+            await db.SaveChangesAsync();
+            log.Add($"Created availability for {teacher.Email} ({string.Join(", ", days)})");
         }
 
         private static async Task GetOrCreateTeacherProfile(AppDbContext db, ApplicationUser teacher, string bio, decimal hourlyRate, List<string> log)
