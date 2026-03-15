@@ -57,7 +57,7 @@ namespace DotnetLearning.Controllers
             // Send the email
             await _emailService.SendAsync(
                 user.Email,
-                "Confirm your SkillSwap email",
+                "Confirm your SkillBridge email",
                 EmailTemplates.ConfirmEmail(user.FirstName, link)
             );
 
@@ -121,7 +121,7 @@ namespace DotnetLearning.Controllers
             // 6. Send email (add template to EmailTemplates.cs too!)
             await _emailService.SendAsync(
                 user.Email,
-                "Reset your SkillSwap password",
+                "Reset your SkillBridge password",
                 EmailTemplates.ResetPassword(user.FirstName, link)
             );
             return Ok("If that email exists, we sent a reset link");

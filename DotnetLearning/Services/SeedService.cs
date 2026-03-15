@@ -11,10 +11,10 @@ namespace DotnetLearning.Services
             var log = new List<string>();
 
             // --- USERS ---
-            var teacher1 = await GetOrCreateUser(userManager, "alice@skillswap.com", "Alice", "Johnson", "Test@1234", "Teacher", log);
-            var teacher2 = await GetOrCreateUser(userManager, "bob@skillswap.com", "Bob", "Smith", "Test@1234", "Teacher", log);
-            var student1 = await GetOrCreateUser(userManager, "charlie@skillswap.com", "Charlie", "Brown", "Test@1234", "Student", log);
-            var student2 = await GetOrCreateUser(userManager, "diana@skillswap.com", "Diana", "Prince", "Test@1234", "Student", log);
+            var teacher1 = await GetOrCreateUser(userManager, "alice@skillbridge.com", "Alice", "Johnson", "Test@1234", "Teacher", log);
+            var teacher2 = await GetOrCreateUser(userManager, "bob@skillbridge.com", "Bob", "Smith", "Test@1234", "Teacher", log);
+            var student1 = await GetOrCreateUser(userManager, "charlie@skillbridge.com", "Charlie", "Brown", "Test@1234", "Student", log);
+            var student2 = await GetOrCreateUser(userManager, "diana@skillbridge.com", "Diana", "Prince", "Test@1234", "Student", log);
 
             // --- TEACHER PROFILES ---
             await GetOrCreateTeacherProfile(db, teacher1, "Full-stack developer and educator with 8 years teaching React, ASP.NET Core, and cloud deployments.", 800, log);
@@ -116,12 +116,12 @@ namespace DotnetLearning.Services
 
             // Alice: Mon, Wed, Fri  9am–5pm
             // Bob:   Tue, Thu, Sat 10am–6pm
-            var days = teacher.Email == "alice@skillswap.com"
+            var days = teacher.Email == "alice@skillbridge.com"
                 ? new[] { DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday }
                 : new[] { DayOfWeek.Tuesday, DayOfWeek.Thursday, DayOfWeek.Saturday };
 
-            var start = teacher.Email == "alice@skillswap.com" ? TimeSpan.FromHours(9) : TimeSpan.FromHours(10);
-            var end   = teacher.Email == "alice@skillswap.com" ? TimeSpan.FromHours(17) : TimeSpan.FromHours(18);
+            var start = teacher.Email == "alice@skillbridge.com" ? TimeSpan.FromHours(9) : TimeSpan.FromHours(10);
+            var end   = teacher.Email == "alice@skillbridge.com" ? TimeSpan.FromHours(17) : TimeSpan.FromHours(18);
 
             foreach (var day in days)
             {

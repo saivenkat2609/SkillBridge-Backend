@@ -53,11 +53,13 @@ namespace DotnetLearning.Controllers
         [Route("api/teachers/{teacherId}/availability")]
         public async Task<IActionResult> getTeacherAvailability(string teacherId, DateTime fromDate, int durationInMinutes)
         {
-            var toDate = new DateTime(fromDate.Year, fromDate.Month,
-                            DateTime.DaysInMonth(fromDate.Year, fromDate.Month));
+            var fromDateUtc = DateTime.SpecifyKind(fromDate, DateTimeKind.Utc);
+            var toDate = new DateTime(fromDateUtc.Year, fromDateUtc.Month,
+                            DateTime.DaysInMonth(fromDateUtc.Year, fromDateUtc.Month),
+                            23, 59, 59, DateTimeKind.Utc);
             var existingBookings = await _context.Bookings
                 .Where(b => b.TeacherId == teacherId &&
-                  b.ScheduledAt >= fromDate &&
+                  b.ScheduledAt >= fromDateUtc &&
                   b.ScheduledAt <= toDate &&
                   b.Status != BookingStatus.Cancelled)
                 .ToListAsync();
@@ -65,7 +67,7 @@ namespace DotnetLearning.Controllers
             var regularAvailability = await _context.TeacherAvailabilities.Where(a => a.TeacherId == teacherId).ToListAsync();
             var exceptions = await _context.AvailabilityExceptions.Where(e => e.TeacherId == teacherId && (e.ExceptionDate <= toDate && e.ExceptionDate >= fromDate)).ToListAsync();
             var duration = TimeSpan.FromMinutes(durationInMinutes);
-            for (DateTime currentDay = fromDate; currentDay <= toDate; currentDay = currentDay.AddDays(1))
+            for (DateTime currentDay = fromDateUtc; currentDay <= toDate; currentDay = currentDay.AddDays(1))
             {
                 List<TimeDto> dailyTimeSlots = new List<TimeDto>();
                 var dayOfWeek = currentDay.DayOfWeek;
@@ -75,7 +77,7 @@ namespace DotnetLearning.Controllers
                     var current = dayAvailability.StartTime;
                     while (current + duration <= dayAvailability.EndTime)
                     {
-                        var slotDateTime = currentDay.Date + current;
+                        var slotDateTime = DateTime.SpecifyKind(currentDay.Date + current, DateTimeKind.Utc);
                         var isBooked = existingBookings.Any(b => b.ScheduledAt == slotDateTime);
 
                         dailyTimeSlots.Add(new TimeDto(current, current + duration, isBooked));
@@ -94,7 +96,7 @@ namespace DotnetLearning.Controllers
                         }
                         else
                         {
-                            var slotDateTime = currentDay.Date + current;
+                            var slotDateTime = DateTime.SpecifyKind(currentDay.Date + current, DateTimeKind.Utc);
                             var isBooked = existingBookings.Any(b => b.ScheduledAt == slotDateTime);
                             dailyTimeSlots.Add(new TimeDto(current, current + duration, isBooked));
                         }
