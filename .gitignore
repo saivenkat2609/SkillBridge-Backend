@@ -362,4 +362,7 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 # Local secrets - never commit
-DotnetLearning/appsettings.Development.json
+SkillBridge/appsettings.Development.json
+
+# User uploaded files
+SkillBridge/wwwroot/images/skills/
