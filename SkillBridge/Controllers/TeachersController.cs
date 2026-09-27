@@ -15,12 +15,44 @@ namespace SkillBridge.Controllers
         public record DayAvailabilityDto(DateTime Date, List<TimeDto> Slots);
         public record GetTeacherStats(List<Skill> TeacherSkills,List<BookingDto> UpcomingBookings, List<BookingDto> CompletedBookings,
             decimal TotalEarnings, double AverageRating);
+        public record PublicTeacherProfileDto(string Id, string Name, string? Bio, decimal? HourlyRate,
+            List<Skill> Skills, double AverageRating, int TotalReviews);
         public record BookingDto(int BookingId, string SkillTitle, string LearnerName,
       DateTime ScheduledAt, int DurationMinutes, decimal TotalPrice, string Status);
         public TeachersController(AppDbContext context)
         {
             _context = context;
         }
+        [HttpGet]
+        [Authorize]
+        [Route("api/teachers/{teacherId}/profile")]
+        public async Task<IActionResult> GetTeacherProfile(string teacherId)
+        {
+            var user = await _context.Users
+                .Include(u => u.TeacherProfile)
+                .FirstOrDefaultAsync(u => u.Id == teacherId);
+
+            if (user == null) return NotFound();
+
+            var skills = await _context.Skills
+                .Include(s => s.Category)
+                .Where(s => s.TeacherId == teacherId && s.IsActive == true)
+                .ToListAsync();
+
+            var averageRating = skills.Count > 0 ? skills.Average(s => s.Rating) : 0.0;
+            var totalReviews = skills.Sum(s => s.NumberOfReviews);
+
+            return Ok(new PublicTeacherProfileDto(
+                Id: teacherId,
+                Name: $"{user.FirstName} {user.LastName}",
+                Bio: user.TeacherProfile?.Bio,
+                HourlyRate: user.TeacherProfile?.HourlyRate,
+                Skills: skills,
+                AverageRating: averageRating,
+                TotalReviews: totalReviews
+            ));
+        }
+
         [HttpPost]
         [Authorize(Roles = "Teacher")]
         [Route("api/teachers/profile")]
