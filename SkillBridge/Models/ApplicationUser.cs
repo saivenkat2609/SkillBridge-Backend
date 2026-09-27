@@ -7,7 +7,7 @@ namespace SkillBridge.Models
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public TeacherProfile? TeacherProfile { get; set; }
-        public bool IsOnboardingComplete { get; set; } = true;
+        public bool IsOnboardingComplete { get; set; } = false;
 
     }
 }

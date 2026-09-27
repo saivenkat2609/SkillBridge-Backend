@@ -14,12 +14,14 @@ namespace SkillBridge.Controllers
     [ApiController]
     public class AccountController:ControllerBase
     {
+       
+        public record GoogleLoginDto(string IdToken);
+        public record ForgotPasswordDto(string Email);
+
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
         private readonly IEmailService _emailService;
-        public record GoogleLoginDto(string IdToken);
-        public record ForgotPasswordDto(string Email);
         public AccountController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration,IEmailService emailService)
         {
             _userManager = userManager;
@@ -27,7 +29,7 @@ namespace SkillBridge.Controllers
             _configuration = configuration;
             _emailService = emailService;
         }
-        public record RegisterDto(string? FirstName, string? LastName,string Email, string Password, bool? RememberMe,bool? isTeacher);
+        public record RegisterDto(string? FirstName, string? LastName, string Email, string Password, bool? RememberMe);
         public record LoginDto(string Email, string Password, bool? RememberMe);
         [HttpPost]
         [Route("/api/auth/register")]
@@ -39,14 +41,15 @@ namespace SkillBridge.Controllers
                 LastName = register.LastName,
                 UserName = register.Email,
                 Email = register.Email,
-                EmailConfirmed = false   // ← explicit
+                EmailConfirmed = false,
+                IsOnboardingComplete = false
             };
 
             var result = await _userManager.CreateAsync(user, register.Password);
             if (!result.Succeeded)
                 return BadRequest(result.Errors);
 
-            await _userManager.AddToRoleAsync(user, register.isTeacher == true ? "Teacher" : "User");
+            await _userManager.AddToRoleAsync(user, "Student");
 
             // Generate token & encode it for URL safety
             var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
